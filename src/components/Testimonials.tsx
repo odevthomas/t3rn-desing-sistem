@@ -1,12 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Star } from "lucide-react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { useEffect, useRef } from "react";
 
 const testimonials = [
   {
@@ -36,6 +30,30 @@ const testimonials = [
 ];
 
 const Testimonials = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+
+    const scrollHeight = scrollContainer.scrollHeight / 2;
+    let scrollTop = 0;
+    let animationId: number;
+
+    const scroll = () => {
+      scrollTop += 0.5;
+      if (scrollTop >= scrollHeight) {
+        scrollTop = 0;
+      }
+      scrollContainer.scrollTop = scrollTop;
+      animationId = requestAnimationFrame(scroll);
+    };
+
+    animationId = requestAnimationFrame(scroll);
+
+    return () => cancelAnimationFrame(animationId);
+  }, []);
+
   return (
     <section className="py-24 relative">
       <div className="container mx-auto px-4">
@@ -48,28 +66,35 @@ const Testimonials = () => {
           </p>
         </div>
 
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full max-w-5xl mx-auto"
-        >
-          <CarouselContent>
-            {testimonials.map((testimonial, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
-                <Card className="p-8 h-full bg-card border-border hover:border-primary transition-all duration-500 hover:shadow-[0_0_30px_hsl(30_100%_50%/0.2)] group">
+        <div className="relative max-w-3xl mx-auto">
+          {/* Gradient overlays for smooth fade */}
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
+
+          {/* Scrolling container */}
+          <div
+            ref={scrollRef}
+            className="h-[600px] overflow-hidden"
+            style={{ scrollBehavior: "auto" }}
+          >
+            <div className="space-y-6">
+              {/* Duplicate testimonials for infinite scroll effect */}
+              {[...testimonials, ...testimonials].map((testimonial, index) => (
+                <Card
+                  key={index}
+                  className="p-8 bg-card border-border hover:border-primary transition-all duration-500 hover:shadow-[0_0_30px_hsl(30_100%_50%/0.3)] group"
+                >
                   <div className="space-y-4">
                     <div className="flex gap-1">
                       {[...Array(testimonial.rating)].map((_, i) => (
                         <Star key={i} className="w-5 h-5 fill-primary text-primary" />
                       ))}
                     </div>
-                    
+
                     <p className="text-lg italic text-muted-foreground leading-relaxed">
                       "{testimonial.content}"
                     </p>
-                    
+
                     <div className="pt-4 border-t border-border">
                       <p className="font-bold text-foreground group-hover:text-primary transition-colors">
                         {testimonial.name}
@@ -80,12 +105,10 @@ const Testimonials = () => {
                     </div>
                   </div>
                 </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="border-primary text-primary hover:bg-primary hover:text-primary-foreground" />
-          <CarouselNext className="border-primary text-primary hover:bg-primary hover:text-primary-foreground" />
-        </Carousel>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

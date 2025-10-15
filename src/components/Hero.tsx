@@ -1,16 +1,37 @@
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
+import { useEffect, useRef } from "react";
+import tern3dLogo from "@/assets/tern-3d-logo.png";
 
 const Hero = () => {
+  const parallaxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (parallaxRef.current) {
+        const scrolled = window.scrollY;
+        parallaxRef.current.style.transform = `translateY(${scrolled * 0.5}px)`;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background with gradient overlay */}
+      {/* Parallax Background with 3D Logo */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-40"
-        style={{ backgroundImage: `url(${heroBg})` }}
+        ref={parallaxRef}
+        className="absolute inset-0 bg-cover bg-center opacity-30 transition-transform duration-100"
+        style={{ 
+          backgroundImage: `url(${tern3dLogo})`,
+          backgroundPosition: "center",
+          backgroundSize: "contain",
+          backgroundRepeat: "no-repeat"
+        }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
       
       {/* Animated gradient orbs */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-float" />
